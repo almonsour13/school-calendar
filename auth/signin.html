@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Dorsu Event Calendar</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="shortcut icon" href="../assets/img/dorsu-logo-bc.png" type="image/x-icon">
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Login Form -->
+    <div class="flex-grow flex items-center justify-center px-4">
+        <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-xl">
+            <div class="flex flex-col items-center space-y-4">
+                <!-- Logo inside login form -->
+                <a href="../index.html" class="">
+                    <img src="../assets/img/dorsu-logo-bc.png" alt="DOrSU Logo" class="h-16 md:h-20 w-16 md:w-20">
+                  </a>
+                <div class="text-center space-y-1">
+                    <h2 class="mt-4 text-3xl font-extrabold text-gray-900">
+                        Sign in to your account
+                    </h2>
+                    <p class="text-gray-500">Only authorized users can sign in to this website.</p>
+                </div>
+            </div>
+            <form class="mt-8 space-y-6" id="loginForm">
+                <input type="hidden" name="remember" value="true">
+                <div class="rounded-md shadow-sm space-y-2">
+                    <div class="space-y-1">
+                        <label for="username">Username</label>
+                        <input id="username" name="username" type="text" value="admin@example.com" required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Username">
+                    </div>
+                    <div class="space-y-1">
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" value="admin123" required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Password">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" id="submitButton" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <span id="buttonText">Sign in</span>
+                        <span id="loadingSpinner" class="hidden ml-2 animate-spin border-2 border-t-2 border-white rounded-full w-4 h-4 border-t-transparent"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast position fixed top-4 left-1/2 transform -translate-x-1/2">
+        <div class="p-4 rounded-md bg-white border shadow-lg">
+            <p>Sample Toast Message</p>
+        </div>
+    </div>
+
+    <script>
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+        if (loggedInUser && loggedInUser.token) {
+            window.location.href = '/admin/admin.html';
+        }
+
+        const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+    
+        if (storedUsers.length === 0) {
+            storedUsers.push({ id: 1, name: 'Admin User', email: 'admin@example.com', password: 'admin123' });
+            localStorage.setItem('users', JSON.stringify(storedUsers));
+        }
+    
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            document.getElementById('buttonText').classList.add('hidden');
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+    
+            setTimeout(() => {
+                const authenticatedUser = storedUsers.find(user => user.email === username && user.password === password);
+                
+                if (authenticatedUser) {
+                    const token = `token-${authenticatedUser.id}`;
+                    
+                    localStorage.setItem('loggedInUser', JSON.stringify({
+                        ...authenticatedUser,
+                        token: token
+                    }));
+                    window.location.href = '/admin/admin.html';
+                } else {
+                    showToast('Invalid username or password');
+                }
+                document.getElementById('buttonText').classList.remove('hidden');
+                document.getElementById('loadingSpinner').classList.add('hidden');
+            }, 2000);
+        });
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastContent = toast.querySelector('p');
+            
+            toastContent.textContent = message;
+
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+            }, 2000);
+
+            setTimeout(() => {
+                toast.classList.remove('show', 'fade-out');
+            }, 2500);
+        }
+    </script>
+    
+    
+</body>
+</html>
